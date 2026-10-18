@@ -1,0 +1,20 @@
+# macOS
+.DS_Store
+
+# Build products, local backups and test artifacts
+/output/
+.build/
+DerivedData/
+
+# Python caches
+__pycache__/
+*.py[cod]
+
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+
+# Local agent / editor state
+.claude/
+.codex/

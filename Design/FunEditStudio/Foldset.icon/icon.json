@@ -1,0 +1,15 @@
+{
+  "fill" : "none",
+  "groups" : [
+    {
+      "layers" : [
+        { "name" : "artwork", "image-name" : "artwork.png", "glass" : false },
+        { "name" : "background", "image-name" : "background.png", "glass" : false }
+      ],
+      "shadow" : { "kind" : "neutral", "opacity" : 0 },
+      "specular" : false,
+      "translucency" : { "enabled" : false, "value" : 0 }
+    }
+  ],
+  "supported-platforms" : { "squares" : [ "macOS" ] }
+}
