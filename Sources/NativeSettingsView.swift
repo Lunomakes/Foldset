@@ -30,7 +30,9 @@ struct NativeMainView: View {
             .background(Theme.canvas)
             .navigationTitle(store.selected?.displayName ?? "Foldset")
             .toolbar {
-                ToolbarItem {
+                // The hidden title leaves the detail toolbar leading-aligned; push the menu to the trailing corner.
+                if #available(macOS 26, *) { ToolbarSpacer(.flexible) }
+                ToolbarItem(placement: .primaryAction) {
                     Menu {
                         Button("复制模板") { store.duplicate() }
                         Button("删除模板…", role: .destructive) { confirmDelete = true }
@@ -99,17 +101,21 @@ private struct TemplateSidebar: View {
             .padding(.horizontal, 16).padding(.vertical, 10)
             .accessibilityElement(children: .combine)
         }
-        .safeAreaInset(edge: .bottom) {
-            VStack(alignment: .leading, spacing: 10) {
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            VStack(alignment: .leading, spacing: 0) {
                 Button { store.add() } label: { Label("新建模板", systemImage: "plus") }
                     .buttonStyle(.bordered)
-                Divider()
-                SettingsLink { Label("设置", systemImage: "gearshape") }.buttonStyle(.borderless)
-                Button { showHelp = true } label: { Label("Finder 右键与使用说明", systemImage: "questionmark.circle") }
-                    .buttonStyle(.borderless)
+                    .padding(16)
+                VStack(alignment: .leading, spacing: 10) {
+                    SettingsLink { Label("设置", systemImage: "gearshape") }.buttonStyle(.borderless)
+                    Button { showHelp = true } label: { Label("Finder 右键与使用说明", systemImage: "questionmark.circle") }
+                        .buttonStyle(.borderless)
+                }
+                .padding(.horizontal, 16)
+                .frame(maxWidth: .infinity, minHeight: Theme.footerHeight, alignment: .leading)
+                .overlay(alignment: .top) { Rectangle().fill(Theme.border).frame(height: 1) }
             }
             .font(.callout).foregroundStyle(Theme.ink2)
-            .padding(16)
         }
     }
 }
@@ -155,6 +161,18 @@ private struct TemplateFlowPage: View {
         }
         .animation((systemStill || preferStill) ? nil : .easeInOut(duration: 0.18), value: preview)
         .safeAreaInset(edge: .bottom, spacing: 0) { CreateBar(store: store, preview: preview) }
+        // Content scrolls under the transparent titlebar; fade and blur it so it never collides with the toolbar.
+        .overlay(alignment: .top) {
+            GeometryReader { g in
+                Rectangle().fill(.ultraThinMaterial)
+                    .overlay(LinearGradient(colors: [Theme.canvas, Theme.canvas.opacity(0.8)], startPoint: .top, endPoint: .bottom))
+                    .mask(LinearGradient(stops: [.init(color: .black, location: 0.6), .init(color: .clear, location: 1)], startPoint: .top, endPoint: .bottom))
+                    .frame(height: g.safeAreaInsets.top + 16)
+                    .ignoresSafeArea(edges: .top)
+            }
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
+        }
         // Keyboard users tab into fields below the fold; keep the focused field on screen.
         .onChange(of: focusedEntry) { _, id in if let id { reveal(id, proxy) } }
         .onChange(of: settingsFocus) { _, field in if let field { reveal(field, proxy) } }
@@ -174,6 +192,7 @@ private struct FlowCard: View {
     let preview: CreationPreview?
     var focusedEntry: FocusState<UUID?>.Binding
     @ViewState private var dragging: UUID?
+    @ViewState private var wide = true
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             VStack(alignment: .leading, spacing: 6) {
@@ -187,10 +206,10 @@ private struct FlowCard: View {
                 Text(ruleSentence).font(Theme.body).foregroundStyle(Theme.ink2).fixedSize(horizontal: false, vertical: true)
             }
             .padding(.bottom, 18)
-            ViewThatFits(in: .horizontal) {
-                wideDiagram.frame(minWidth: 620)
-                narrowDiagram
-            }
+            // Pick by width instead of ViewThatFits, which lays out both diagrams on every resize frame (sidebar animation jank).
+            Group { if wide { wideDiagram } else { narrowDiagram } }
+                .frame(maxWidth: .infinity)
+                .onGeometryChange(for: Bool.self) { $0.size.width >= 620 } action: { wide = $0 }
             Button {
                 let entry = FolderEntry(name: "")
                 template.entries.append(entry)
@@ -600,7 +619,8 @@ private struct CreateBar: View {
                 .disabled(!store.canCreate)
                 .help(preview?.canCreate == true ? "⌘↩" : "先处理流程中的问题")
         }
-        .padding(.horizontal, 24).padding(.vertical, 14)
+        .padding(.horizontal, 24)
+        .frame(minHeight: Theme.footerHeight)
         .background(Theme.canvas)
         .overlay(alignment: .top) { Rectangle().fill(Theme.border).frame(height: 1) }
     }
