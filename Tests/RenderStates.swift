@@ -53,6 +53,8 @@ import AppKit
         try shot("S2-failed") { (try store("samples"), { s in
             let t = try? target("failed"); s.target = t; settle()
             s.outcome = .init(succeeded: false, message: "创建“03_音乐音效”失败：权限不足。\n本次已创建 2 个，跳过 0 个。已创建的文件夹保留，现有内容未覆盖。", target: t!) }) }
+        // Scrolled: content fades out under the toolbar instead of colliding with it.
+        try shot("S1-scrolled", late: { _ in scrollDetail(by: 180) }) { (try store("samples"), { _ in }) }
         // Narrow window: the diagram falls back to a stacked layout.
         try shot("S1-narrow-760", size: NSSize(width: 760, height: 900)) { (try store("samples"), { s in
             s.target = try? target("narrow", folders: ["01_视频素材"]); settle() }) }
@@ -76,6 +78,14 @@ import AppKit
         for folder in folders { try fm.createDirectory(at: url.appendingPathComponent(folder), withIntermediateDirectories: false) }
         for file in files { try Data().write(to: url.appendingPathComponent(file)) }
         return url
+    }
+    /// Scrolls the widest scroll view in the visible window: the detail page, not the sidebar list.
+    static func scrollDetail(by y: CGFloat) {
+        func all(_ v: NSView) -> [NSView] { [v] + v.subviews.flatMap(all) }
+        guard let root = NSApp.windows.first(where: \.isVisible)?.contentView,
+              let scroll = all(root).compactMap({ $0 as? NSScrollView }).max(by: { $0.frame.width < $1.frame.width }) else { return }
+        scroll.contentView.scroll(to: NSPoint(x: 0, y: scroll.contentView.bounds.origin.y + y))
+        scroll.reflectScrolledClipView(scroll.contentView)
     }
     static func settle(_ seconds: Double = 0.35) {
         RunLoop.main.run(until: Date().addingTimeInterval(seconds))

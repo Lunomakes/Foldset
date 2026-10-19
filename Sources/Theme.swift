@@ -25,6 +25,8 @@ enum Theme {
     static let bad = hex(0xFF6961)           // systemRed is 4.06:1 on control
     // Shape
     static let radiusCard: CGFloat = 14
+    /// Shared by the sidebar footer and the create bar so their top rules form one line.
+    static let footerHeight: CGFloat = 64
     // Type. The SVG's 590 / 650 weights map onto SF Pro's continuous axis (semibold = 0.3, bold = 0.4).
     static let title = Font(NSFont.systemFont(ofSize: 15, weight: NSFont.Weight(0.28)))
     static let hero = Font(NSFont.systemFont(ofSize: 19, weight: NSFont.Weight(0.35)))
