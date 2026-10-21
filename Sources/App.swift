@@ -19,6 +19,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if (notification.userInfo?[NSApplication.launchIsDefaultUserInfoKey] as? NSNumber)?.boolValue == true {
             showWindow()
         }
+        if (try? Updater.failureMarker.checkResourceIsReachable()) == true {
+            try? FileManager.default.removeItem(at: Updater.failureMarker)
+            store.notice = .init(title: "更新未完成", message: "安装新版本时出错，已保留当前版本。可在“设置 → 通用”中重试。")
+        }
+        // Silent: a newer release only shows the sidebar badge; nothing pops up.
+        if UserDefaults.standard.object(forKey: Updater.autoCheckKey) as? Bool ?? true {
+            Task { await Updater.shared.check(quietly: true) }
+        }
     }
     // Normal launches request an untitled window; service launches do not.
     func applicationShouldOpenUntitledFile(_ sender: NSApplication) -> Bool {
@@ -161,6 +169,8 @@ struct FoldsetSettingsView: View {
     @ObservedObject var store: TemplateStore
     @AppStorage("reduceTransparency") private var reduceTransparency = false
     @AppStorage("reduceMotion") private var reduceMotion = false
+    @AppStorage(Updater.autoCheckKey) private var autoCheckUpdates = true
+    @ObservedObject private var updater = Updater.shared
     @Environment(\.accessibilityReduceTransparency) private var systemOpaque
     @Environment(\.accessibilityReduceMotion) private var systemStill
     var body: some View {
@@ -181,6 +191,10 @@ struct FoldsetSettingsView: View {
                 Section("创建规则") {
                     LabeledContent("已有同名文件夹", value: "保留并跳过")
                     LabeledContent("原有文件与素材", value: "保留")
+                }
+                Section("软件更新") {
+                    UpdateStatusView(updater: updater)
+                    Toggle("启动时自动检查更新", isOn: $autoCheckUpdates)
                 }
                 if let issue = store.persistenceError {
                     Section { Label(issue, systemImage: "exclamationmark.triangle").foregroundStyle(.orange) }

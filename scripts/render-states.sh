@@ -7,7 +7,7 @@ OUT="${1:?usage: render-states.sh <output-dir>}"
 mkdir -p "$OUT"
 swiftc -swift-version 5 -parse-as-library -D RENDER_STATES -target arm64-apple-macosx14.0 \
     Sources/Core.swift Sources/Store.swift Sources/ResolveExtension.swift Sources/ResolveExtensionView.swift \
-    Sources/Theme.swift Sources/NativeSettingsView.swift Sources/App.swift Tests/RenderStates.swift \
+    Sources/Updater.swift Sources/Theme.swift Sources/NativeSettingsView.swift Sources/App.swift Tests/RenderStates.swift \
     -o "$OUT/RenderStates" -framework SwiftUI -framework AppKit
 # Bare executables look up resources next to themselves.
 cp Design/FunEditStudio/BrandIcon-transparent.png "$OUT/BrandIcon.png"

@@ -155,3 +155,18 @@ enum FolderEngine {
         return CreationResult(created: created, skipped: skipped)
     }
 }
+
+enum AppVersion {
+    /// True when `remote` (e.g. "v1.3.0") is a later dotted version than `local` (e.g. "1.2.2").
+    static func isNewer(_ remote: String, than local: String) -> Bool {
+        func parts(_ v: String) -> [Int] {
+            v.trimmingCharacters(in: CharacterSet(charactersIn: "vV ")).split(separator: ".").map { Int($0.prefix { $0.isNumber }) ?? 0 }
+        }
+        let r = parts(remote), l = parts(local)
+        for i in 0..<max(r.count, l.count) {
+            let a = i < r.count ? r[i] : 0, b = i < l.count ? l[i] : 0
+            if a != b { return a > b }
+        }
+        return false
+    }
+}

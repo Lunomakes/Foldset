@@ -97,9 +97,10 @@ private struct TemplateSidebar: View {
                     .frame(width: 26, height: 24).accessibilityHidden(true)
                 Text("Foldset").font(.system(size: 16, weight: .semibold)).foregroundStyle(Theme.ink)
                 Spacer(minLength: 0)
+                UpdateBadge(updater: .shared)
             }
             .padding(.horizontal, 16).padding(.vertical, 10)
-            .accessibilityElement(children: .combine)
+            .accessibilityElement(children: .contain)
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             VStack(alignment: .leading, spacing: 0) {
