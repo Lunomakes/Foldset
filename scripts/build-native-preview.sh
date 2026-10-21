@@ -6,7 +6,7 @@ mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources" "$PWD/output/NativePrev
 if [[ ! -f "$PWD/output/NativePreviewData/templates.json" && -f "$HOME/Library/Application Support/XuXia/templates.json" ]]; then
     cp "$HOME/Library/Application Support/XuXia/templates.json" "$PWD/output/NativePreviewData/templates.json"
 fi
-swiftc -swift-version 5 -D NATIVE_PREVIEW -O -target arm64-apple-macosx14.0 Sources/Core.swift Sources/Store.swift Sources/ResolveExtension.swift Sources/ResolveExtensionView.swift Sources/Theme.swift Sources/NativeSettingsView.swift Sources/App.swift -o "$APP/Contents/MacOS/XuXia" -framework SwiftUI -framework AppKit
+swiftc -swift-version 5 -D NATIVE_PREVIEW -O -target arm64-apple-macosx14.0 Sources/Core.swift Sources/Store.swift Sources/ResolveExtension.swift Sources/ResolveExtensionView.swift Sources/Updater.swift Sources/Theme.swift Sources/NativeSettingsView.swift Sources/App.swift -o "$APP/Contents/MacOS/XuXia" -framework SwiftUI -framework AppKit
 cp Assets/Info.plist "$APP/Contents/Info.plist"
 /usr/libexec/PlistBuddy -c 'Set :CFBundleIdentifier com.xuxia.foldertemplates.nativepreview' "$APP/Contents/Info.plist"
 /usr/libexec/PlistBuddy -c 'Set :CFBundleName Foldset Preview' "$APP/Contents/Info.plist"

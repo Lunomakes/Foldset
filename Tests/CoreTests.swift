@@ -100,6 +100,8 @@ import Foundation
         catch { check(error.localizedDescription == "第 2 个文件夹名称为空。", "首个问题仍然抛出") }
         let gone = FolderEngine.preview(template: sample, target: previewRoot.appendingPathComponent("missing"))
         check(gone.targetIssue != nil && !gone.canCreate, "目标不存在时整体提示")
+        check(AppVersion.isNewer("v1.2.3", than: "1.2.2") && AppVersion.isNewer("1.10.0", than: "1.9.9") && AppVersion.isNewer("2", than: "1.9"), "新版本号判定为更新")
+        check(!AppVersion.isNewer("v1.2.2", than: "1.2.2") && !AppVersion.isNewer("1.2", than: "1.2.0") && !AppVersion.isNewer("1.2.1", than: "1.2.2"), "相同或更旧版本不更新")
         print("ALL \(count) CHECKS PASSED")
     }
 }
