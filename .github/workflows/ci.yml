@@ -31,6 +31,6 @@ jobs:
       - name: Upload release candidate
         uses: actions/upload-artifact@v4
         with:
-          name: Foldset-${{ github.sha }}
+          name: Foldset-${{ github.event.pull_request.head.sha || github.sha }}
           path: output/Release/
           retention-days: 14
