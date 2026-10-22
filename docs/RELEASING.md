@@ -17,6 +17,7 @@ to `main`, every pull request, and on demand. The script runs, in order:
 
 The zip/dmg land in the run's `Foldset-<sha>` artifact (kept 14 days). CI builds are a
 check, not the shipped binary: releases are still built and uploaded from the maintainer's Mac.
+Fetch one with `gh run download <run-id> -R Lunomakes/Foldset -n Foldset-<sha>`.
 
 Run the same checks locally with `zsh scripts/ci.sh`.
 
