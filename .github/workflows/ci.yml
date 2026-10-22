@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-and-package:
+    # The app uses the macOS 26 SDK (ToolbarSpacer), so older runner images cannot build it.
+    runs-on: macos-26
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - name: Toolchain
+        run: |
+          sw_vers
+          xcodebuild -version
+          swift --version
+          python3 --version
+      - name: Test, build and package
+        run: zsh scripts/ci.sh
+      - name: Upload release candidate
+        uses: actions/upload-artifact@v4
+        with:
+          name: Foldset-${{ github.sha }}
+          path: output/Release/
+          retention-days: 14
