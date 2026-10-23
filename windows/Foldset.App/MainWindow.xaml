@@ -1,0 +1,157 @@
+<Window
+    x:Class="Foldset.App.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:core="using:Foldset.Core"
+    Title="Foldset">
+    <Window.SystemBackdrop>
+        <MicaBackdrop />
+    </Window.SystemBackdrop>
+
+    <Grid Padding="16" ColumnSpacing="16">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="240" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Templates -->
+        <Grid RowSpacing="8">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <ListView x:Name="TemplateList" SelectionChanged="TemplateList_SelectionChanged" AutomationProperties.Name="模板">
+                <ListView.ItemTemplate>
+                    <DataTemplate x:DataType="core:FolderTemplate">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBlock Text="{x:Bind DisplayName, Mode=OneWay}" VerticalAlignment="Center" />
+                            <FontIcon Glyph="&#xE735;" FontSize="12" Visibility="{x:Bind IsDefault, Mode=OneWay}" AutomationProperties.Name="默认模板" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+            <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="4">
+                <Button Click="Add_Click" ToolTipService.ToolTip="新建模板 (Ctrl+N)" AutomationProperties.Name="新建模板">
+                    <FontIcon Glyph="&#xE710;" FontSize="14" />
+                    <Button.KeyboardAccelerators>
+                        <KeyboardAccelerator Modifiers="Control" Key="N" />
+                    </Button.KeyboardAccelerators>
+                </Button>
+                <Button x:Name="DuplicateButton" Click="Duplicate_Click" ToolTipService.ToolTip="复制模板" AutomationProperties.Name="复制模板">
+                    <FontIcon Glyph="&#xE8C8;" FontSize="14" />
+                </Button>
+                <Button x:Name="DefaultButton" Click="Default_Click" ToolTipService.ToolTip="设为默认模板" AutomationProperties.Name="设为默认模板">
+                    <FontIcon Glyph="&#xE734;" FontSize="14" />
+                </Button>
+                <Button x:Name="DeleteButton" Click="Delete_Click" ToolTipService.ToolTip="删除模板…" AutomationProperties.Name="删除模板">
+                    <FontIcon Glyph="&#xE74D;" FontSize="14" />
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <!-- Editor and preview -->
+        <Grid Grid.Column="1" RowSpacing="12">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <InfoBar x:Name="PersistenceBar" Severity="Error" IsClosable="False" />
+
+            <Grid x:Name="Settings" Grid.Row="1" ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <TextBox x:Name="NameBox" Header="模板名称" TextChanged="NameBox_TextChanged" />
+                <ToggleSwitch x:Name="NumberedSwitch" Grid.Column="1" Header="编号" Toggled="Settings_Changed" />
+                <NumberBox x:Name="StartBox" Grid.Column="2" Header="起始数字" Minimum="0" Maximum="999999" SpinButtonPlacementMode="Compact" ValueChanged="Number_Changed" />
+                <NumberBox x:Name="DigitsBox" Grid.Column="3" Header="编号位数" Minimum="1" Maximum="6" SpinButtonPlacementMode="Compact" ValueChanged="Number_Changed" />
+                <TextBox x:Name="SeparatorBox" Grid.Column="4" Header="分隔符" MaxLength="3" TextChanged="Settings_Changed" />
+            </Grid>
+
+            <Grid Grid.Row="2" ColumnSpacing="16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Grid RowSpacing="8">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Text="文件夹" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                    <ListView x:Name="EntryList" Grid.Row="1" SelectionMode="None" CanReorderItems="True" CanDragItems="True" AllowDrop="True" AutomationProperties.Name="文件夹">
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="core:FolderEntry">
+                                <Grid ColumnSpacing="8" Padding="0,2">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <FontIcon Glyph="&#xE76F;" FontSize="12" Opacity="0.5" />
+                                    <TextBox Grid.Column="1" Text="{x:Bind Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="文件夹名称" />
+                                    <Button Grid.Column="2" Click="RemoveEntry_Click" AutomationProperties.Name="删除此文件夹" ToolTipService.ToolTip="删除此文件夹">
+                                        <FontIcon Glyph="&#xE711;" FontSize="12" />
+                                    </Button>
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                    <Button Grid.Row="2" Content="添加文件夹" Click="AddEntry_Click" />
+                </Grid>
+
+                <Grid Grid.Column="1" RowSpacing="8">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Text="预览" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                    <TextBlock x:Name="PreviewIssue" Grid.Row="1" TextWrapping="Wrap" Foreground="{ThemeResource SystemFillColorCriticalBrush}" Visibility="Collapsed" />
+                    <ListView x:Name="PreviewList" Grid.Row="2" SelectionMode="None" IsItemClickEnabled="False" AutomationProperties.Name="预览" />
+                </Grid>
+            </Grid>
+
+            <InfoBar x:Name="OutcomeBar" Grid.Row="3">
+                <InfoBar.ActionButton>
+                    <Button x:Name="RevealButton" Content="在资源管理器中显示" Click="Reveal_Click" />
+                </InfoBar.ActionButton>
+            </InfoBar>
+
+            <Grid Grid.Row="4" ColumnSpacing="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock x:Name="TargetText" Text="尚未选择目标文件夹" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                <Button Grid.Column="1" Content="选择目标文件夹…" Click="PickTarget_Click">
+                    <Button.KeyboardAccelerators>
+                        <KeyboardAccelerator Modifiers="Control" Key="O" />
+                    </Button.KeyboardAccelerators>
+                </Button>
+                <Button x:Name="CreateButton" Grid.Column="2" Content="创建文件夹" Style="{StaticResource AccentButtonStyle}" Click="Create_Click" IsEnabled="False">
+                    <Button.KeyboardAccelerators>
+                        <KeyboardAccelerator Modifiers="Control" Key="Enter" />
+                    </Button.KeyboardAccelerators>
+                </Button>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>
