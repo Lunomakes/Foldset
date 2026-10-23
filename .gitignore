@@ -19,3 +19,7 @@ __pycache__/
 .claude/
 .codex/
 CLAUDE.md
+
+# .NET (windows/)
+bin/
+obj/

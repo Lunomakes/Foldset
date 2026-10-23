@@ -85,6 +85,23 @@ zsh scripts/build.sh
 
 构建产物位于 `output/Foldset.app`，使用本地临时签名（ad-hoc）。运行 `zsh scripts/package.sh` 会重新构建，并在 `output/Release/` 生成发布用的 zip、dmg 和对应的 `.sha256`。更多技术细节见 [项目介绍](项目介绍.md)。
 
+## Windows 版（预览）
+
+`windows/` 下是 Windows 10/11 版本（C# + WinUI 3），目前只有核心功能：编辑模板、预览并创建文件夹。暂无资源管理器右键菜单、DaVinci Resolve 扩展和自动更新。
+
+- 下载：CI 每次构建都会产出 `Foldset-windows-x64.zip`（解压后运行 `Foldset.exe`，无需安装运行时）。程序未签名，首次运行时 SmartScreen 会提示，点“更多信息 → 仍要运行”。
+- 模板保存在 `%APPDATA%\Foldset\templates.json`，格式与 macOS 版相同，可直接拷贝过来使用。
+- 除 macOS 版的规则外，名称还不能包含 `\ * ? " < > |`，不能以点或空格结尾，也不能是 `CON`、`NUL`、`COM1` 等系统保留名。
+
+从源码构建需要 .NET 10 SDK：
+
+```powershell
+dotnet run --project windows/Foldset.Core.Tests
+dotnet publish windows/Foldset.App -c Release -r win-x64 -p:Platform=x64 -o output/windows/Foldset
+```
+
+核心库和测试也能在 macOS 上用 .NET SDK 运行；界面只能在 Windows 上构建。
+
 ## 许可证
 
 [MIT](LICENSE)

@@ -34,3 +34,28 @@ jobs:
           name: Foldset-${{ github.event.pull_request.head.sha || github.sha }}
           path: output/Release/
           retention-days: 14
+
+  windows:
+    runs-on: windows-2025
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - name: Toolchain
+        run: dotnet --info
+      - name: Core tests
+        run: dotnet run --project windows/Foldset.Core.Tests -c Release
+      - name: Build and package
+        shell: pwsh
+        run: |
+          dotnet publish windows/Foldset.App -c Release -r win-x64 -p:Platform=x64 -o output/windows/Foldset
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          New-Item -ItemType Directory -Force output/Release | Out-Null
+          Compress-Archive -Path output/windows/Foldset -DestinationPath output/Release/Foldset-windows-x64.zip -Force
+          $hash = (Get-FileHash output/Release/Foldset-windows-x64.zip -Algorithm SHA256).Hash.ToLower()
+          "$hash  Foldset-windows-x64.zip" | Out-File -Encoding ascii output/Release/Foldset-windows-x64.zip.sha256
+      - name: Upload Windows build
+        uses: actions/upload-artifact@v4
+        with:
+          name: Foldset-windows-${{ github.event.pull_request.head.sha || github.sha }}
+          path: output/Release/
+          retention-days: 14
